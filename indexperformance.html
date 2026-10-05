@@ -1,0 +1,221 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reels Performance Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#000;--c:#141414;--l:#2a2a2a;--t:#f4f4f0;--m:#9a9a92;--y:#ffd60a;--g:#5ad27a;--r:#ff6b5e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:16px/1.7 Cairo,system-ui,sans-serif}
+main{max-width:860px;margin:auto;padding:16px 14px 60px}
+h1{font-size:1.5rem;margin:8px 0}h2{font-size:1.15rem;margin:0 0 10px}h3{margin:14px 0 6px;font-size:1rem}
+nav{display:flex;gap:6px;margin:10px 0;flex-wrap:wrap}
+button,select,input,textarea{font:inherit;color:var(--t)}
+button{background:var(--c);border:1px solid var(--l);padding:8px 14px;border-radius:8px;cursor:pointer}
+button.p{background:var(--y);color:#000;border-color:var(--y);font-weight:800}button.on{border-color:var(--y);color:var(--y)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--y)}
+.card{background:var(--c);border:1px solid var(--l);border-radius:12px;padding:14px;margin:12px 0}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+label{display:block;font-size:.85rem;color:var(--m)}
+input,select,textarea{width:100%;background:#000;border:1px solid var(--l);border-radius:8px;padding:8px;margin-top:3px}
+.steps{display:flex;gap:4px;margin:10px 0}.steps div{flex:1;text-align:center;font-size:.8rem;padding:6px 2px;border-bottom:3px solid var(--l);color:var(--m)}.steps .on{border-color:var(--y);color:var(--y)}
+.big{font-size:4rem;font-weight:800;color:var(--y);line-height:1}
+.tag{display:inline-block;padding:1px 10px;border-radius:99px;border:1px solid var(--y);color:var(--y);font-size:.85rem}
+.kkc{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.kkc>div{border:1px solid var(--l);border-radius:10px;padding:10px}
+.k{border-top:3px solid var(--g)}.ch{border-top:3px solid var(--r)}.te{border-top:3px solid var(--y)}
+.m{border:1px solid var(--l);border-radius:10px;padding:10px;margin:8px 0}.m b{color:var(--y)}.s{color:var(--m);font-size:.85rem}
+table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{border-bottom:1px solid var(--l);padding:5px;text-align:right}.sc{overflow-x:auto}
+.hide{display:none}ul{padding-inline-start:20px;margin:4px 0}
+</style></head><body><main>
+<h1>Reels Performance Analyzer</h1><div class="s">تحليل أداء الـReel من Instagram Insights ← تشخيص ← تجربة الفيديو الجاي</div>
+<nav><button id="n0" class="on" onclick="tab(0)">تحليل</button><button id="n1" onclick="tab(1)">السجل والـBaseline</button><button id="n2" onclick="tab(2)">How this analysis works</button></nav>
+
+<section id="t0"><div class="steps" id="stp"><div>1 Reel Data</div><div>2 Content</div><div>3 Retention</div><div>4 Analysis</div></div>
+<div id="s0" class="card"><h2>بيانات الفيديو</h2><div class="g" id="f1"></div>
+<label>Reel objective<select id="obj" data-f></select></label>
+<label style="margin-top:8px">Screenshot من Insights (اختياري)<input type="file" accept="image/*" onchange="shot()"></label><div class="s" id="shotmsg"></div>
+<div class="s">سيب أي خانة فاضية لو مش متاحة؛ التحليل هيشتغل بالمتاح بس.</div></div>
+<div id="s1" class="card hide"><h2>معلومات المحتوى</h2><div class="g">
+<label>عنوان الريل<input id="title" data-f></label><label>Content Type<select id="ctype" data-f></select></label>
+<label>Hook Type<select id="hooktype" data-f></select></label><label>CTA Type<select id="ctatype" data-f></select></label>
+<label>Pattern Interrupt؟<select id="pi" data-f></select></label><label>Payoff واضح؟<select id="payoff" data-f></select></label></div>
+<label>الـHook<textarea id="hook" data-f rows="2"></textarea></label><label>الـCTA<textarea id="cta" data-f rows="2"></textarea></label>
+<label>محتوى الفيديو في جملة أو جملتين<textarea id="desc" data-f rows="2"></textarea></label>
+<div class="s" style="margin-top:8px">Video Structure</div><div id="st" class="g"></div></div>
+<div id="s2" class="card hide"><h2>Retention Analysis (اختياري)</h2><div class="g" id="f3"></div>
+<label>نقاط Drop-off (سطر لكل نقطة: ثانية:نسبة النزول، مثال 5:18)<textarea id="drops" data-f rows="3" placeholder="5:18&#10;11:12"></textarea></label>
+<div class="s">لو مفيش بيانات Retention سيبها فاضية. مش هنخترع أرقام.</div></div>
+<div id="nv" style="display:flex;gap:8px;justify-content:space-between"><button onclick="go(-1)">رجوع</button><button class="p" id="nx" onclick="go(1)">التالي</button></div>
+<div id="res"></div></section>
+
+<section id="t1" class="hide"></section>
+<section id="t2" class="hide card"><h2>How this analysis works</h2><ul>
+<li>This tool does not know Instagram's private algorithm.</li>
+<li>It uses Instagram-published insights and transparent analytical heuristics to interpret your Reel data.</li>
+<li>Benchmarks are not official Instagram thresholds. هي Analytical benchmarks قابلة للتعديل في كائن <code>BM</code> وفي <code>AP_CUTS</code> داخل الكود.</li>
+<li>Average Viewed % = Average Watch Time ÷ Duration. ده Proxy مش هو الـRetention Chart الرسمي.</li>
+<li>الـScore أداة مقارنة داخلية، بيتوزّع على حسب الـObjective، وبيتجاهل أي Metric غير متاحة.</li>
+<li>الأداة مصممة تساعدك تعمل تجارب أحسن، مش تضمن Reach. بياناتك محفوظة في متصفحك فقط (localStorage).</li></ul></section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const F1=[['dur','Reel Duration (ثانية)'],['plays','Plays / Views'],['reach','Reach'],['awt','Average Watch Time (ثانية)'],['twt','Total Watch Time (ثانية)'],['likes','Likes'],['comments','Comments'],['shares','Shares / Sends'],['saves','Saves'],['reposts','Reposts'],['follows','Follows from Reel'],['folR','Followers Reach'],['nonfR','Non-followers Reach'],['pv','Profile Visits'],['conv','Leads / Conversions'],['accF','Account Followers'],['age','Age of Reel (أيام)']];
+const F3=[['r3','3 sec retention %'],['r25','25% retention'],['r50','50% retention'],['r75','75% retention'],['r100','100% retention']];
+const OPT={obj:['Reach','Followers','Engagement','Shares','Saves','Leads','Authority','Sales'],ctype:['Educational','Storytelling','Case Study','Opinion','Tutorial','Entertainment','Personal Brand','Product','Sales','Other'],hooktype:['Question','Direct Claim','Story','Number/Proof','Other'],ctatype:['Follow','Comment','Share','Save','Link/DM','None','Other'],pi:['Not sure','Yes','No'],payoff:['Not sure','Yes','No']};
+const STR=['Hook','Problem','Story','Explanation','Proof','Value','CTA'];
+const numF=(a)=>a.map(([i,n])=>`<label>${n}<input type="number" step="any" min="0" id="${i}" data-f inputmode="decimal"></label>`).join('');
+$('f1').innerHTML=numF(F1);$('f3').innerHTML=numF(F3);
+for(const k in OPT)$(k).innerHTML=OPT[k].map(o=>`<option>${o}</option>`).join('');
+$('st').innerHTML=STR.map(s=>`<label><input type="checkbox" class="stc" value="${s}" style="width:auto"> ${s}</label>`).join('');
+let step=0,cur=null,editId=null;
+const KEY='reelsHistory';
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]}};
+const save=a=>{try{localStorage.setItem(KEY,JSON.stringify(a))}catch(e){alert('تعذر الحفظ محليًا')}};
+function tab(i){[0,1,2].forEach(k=>{$('t'+k).classList.toggle('hide',k!=i);$('n'+k).classList.toggle('on',k==i)});if(i==1)hist()}
+function go(d){step=Math.max(0,Math.min(3,step+d));[0,1,2].forEach(i=>$('s'+i).classList.toggle('hide',i!=step));
+ [...$('stp').children].forEach((e,i)=>e.classList.toggle('on',i==step));
+ $('nx').textContent=step==2?'Analyze Reel':'التالي';
+ if(step==3){run()}else $('res').innerHTML='';$('nv').classList.toggle('hide',step==3);
+ if(step==3){$('nv').classList.remove('hide');$('nx').classList.add('hide')}else $('nx').classList.remove('hide');window.scrollTo(0,0)}
+function shot(){$('shotmsg').textContent='مفيش OCR داخل التطبيق: استخدم البيانات المكتوبة يدويًا من الـScreenshot.'}
+function get(){const d={};document.querySelectorAll('[data-f]').forEach(e=>{d[e.id]=e.type==='number'?(e.value===''?null:+e.value):e.value});d.st=[...document.querySelectorAll('.stc:checked')].map(e=>e.value);return d}
+const med=a=>{a=a.filter(x=>x!=null).sort((x,y)=>x-y);const n=a.length;return n?(n%2?a[(n-1)/2]:(a[n/2-1]+a[n/2])/2):null};
+function calc(d){const m={};if(d.dur&&d.awt!=null)m.ap=Math.min(100,d.awt/d.dur*100);
+ if(d.reach){const R=d.reach,r=(k,v)=>{if(v!=null)m[k]=v/R*100};r('lk',d.likes);r('cm',d.comments);r('sh',d.shares);r('sv',d.saves);r('fl',d.follows);r('pv',d.pv);
+ const p=[d.likes,d.comments,d.shares,d.saves,d.reposts].filter(x=>x!=null);if(p.length)m.en=p.reduce((a,b)=>a+b,0)/R*100;
+ if(d.nonfR!=null)m.nf=d.nonfR/R*100;else if(d.folR!=null)m.nf=100-d.folR/R*100}return m}
+function baseline(excl){const h=load().filter(r=>r.id!==excl);if(h.length<3)return{n:h.length};
+ const b={n:h.length};['ap','lk','cm','sh','sv','fl','en','nf'].forEach(k=>b[k]=med(h.map(r=>r.m&&r.m[k])));return b}
+// ===== Analytical benchmarks (NOT official Instagram thresholds) =====
+const AP_CUTS=[25,40,55,70],APN=['ضعيف جدًا','ضعيف','متوسط','قوي','قوي جدًا'],SC=[2,4,6,8,9.5];
+const R3_CUTS=[40,55,70,80];
+const BM={lk:[1,3,6],cm:[.05,.2,.5],sh:[.2,.6,1.5],sv:[.3,1,2.5],fl:[.05,.2,.6],en:[2,5,9],nf:[30,55,75]};
+const W={Reach:{ret:.3,nf:.25,sh:.2,wt:.15,en:.1},Followers:{ret:.25,fl:.3,nf:.15,sh:.15,en:.15},Engagement:{cm:.25,sh:.25,lk:.15,sv:.15,ret:.2},Shares:{sh:.35,ret:.25,wt:.15,nf:.15,en:.1},Saves:{sv:.35,ret:.25,wt:.2,sh:.1,en:.1},Authority:{ret:.25,sv:.25,sh:.2,fl:.2,cm:.1},Leads:{ret:.15,cta:.2,pv:.2,cv:.35,en:.1}};W.Sales=W.Leads;
+const NM={ap:'Average Viewed %',sh:'Share Rate',sv:'Save Rate',fl:'Follow Conversion',cm:'Comment Rate',lk:'Like Rate',en:'Engagement Rate',nf:'Non-follower Reach',r3:'3-sec Retention',cta:'CTA clarity',pv:'Profile Visits',cv:'Conversions'};
+const rs=(k,v,b)=>{if(b&&b[k]!=null&&b[k]>0){const r=v/b[k];return r>=1.5?9.5:r>=1.1?7.5:r>=.8?6:r>=.5?4:2}const t=BM[k];return v<t[0]?2.5:v<t[1]?5:v<t[2]?7.5:9.5};
+const lv=s=>s>=7?2:s>=5?1:0,l5=(v,c)=>c.filter(x=>v>=x).length;
+const T={
+sh:[['المشاركة قليلة مقارنة بالـReach','المحتوى ممكن يكون مفهوم لكن مفيش سبب واضح يخلي حد يبعته لشخص تاني','اختبر Takeaway عملي أو مشكلة محددة ("ابعت ده لـ..."). افحص Content Value قبل الاعتماد على الـCTA'],['مشاركة متوسطة','قيمة مقبولة بدون Trigger قوي للإرسال','جرّب زاوية relatable أكتر'],['Shareability قوية','المحتوى غالبًا relatable/عملي/يستحق الإرسال','حافظ على نوع القيمة اللي خلّت الفيديو قابل للمشاركة']],
+sv:[['Saves قليلة','المحتوى أقرب لـentertaining من reference content','لو الهدف Saves/Authority: Framework أو Checklist بخطوات وأرقام. لو الهدف Reach/Engagement فده مش فشل'],['Saves متوسطة','فيه جزء Utility','أضف خطوات أو قالب قابل للتطبيق'],['Utility signal قوية','المحتوى Reference-worthy','استمر في Frameworks وChecklists وخطوات واضحة']],
+fl:[['Follow Conversion ضعيفة','القيمة ممكن مش مرتبطة بهويتك، أو الـCTA ووعد الحساب مش واضحين','اربط الفيديو بسلسلة محتوى واذكر الوعد اللي المتابع هياخده، واختبر CTA محدد'],['تحويل متوسط','الوعد مقبول','اختبر CTA مرتبط بالفيديو الجاي'],['تحويل قوي','الفيديو حوّل المشاهدة لمتابعين','حافظ على الربط بين الموضوع وهوية الحساب']],
+cm:[['Comments قليلة','مش فشل تلقائي؛ راجع الهدف والـCTA والموضوع','لو الهدف Engagement اختبر سؤال محدد في الـCTA'],['Comments متوسطة','نقاش مقبول','سؤال أدق ممكن يزودها'],['نقاش قوي','الموضوع بيحفّز الرد','حافظ على نوع الأسئلة']],
+nf:[['وصول محدود خارج المتابعين','تفسير محتمل (مش مؤكد): موضوع ضيق/موجّه لجمهورك أو Distribution محدود','وسّع زاوية الموضوع لمشكلة أعم مع نفس القيمة'],['وصول متوسط خارج المتابعين','توزيع معقول','كرّر الـformat على Topic أعم'],['وصل خارج الجمهور الحالي','ده مش يعني تلقائيًا viral','حافظ على الموضوع والـformat']],
+lk:[['Likes قليلة','Likes وحدها مش مقياس جودة','راجع Shares/Saves قبل أي قرار'],['Likes متوسطة','—','—'],['Likes عالية','لو Shares/Saves ضعيفة فده Approval أكتر من Utility','أضف سبب للإرسال أو الحفظ']],
+en:[['Engagement ضعيف','قياسًا بالـReach التفاعل محدود','حدّد مشكلة واحدة واضحة وقدّم نتيجة ملموسة'],['Engagement متوسط','—','اختبر عنصر تفاعل واحد'],['Engagement قوي','الفيديو بيحرّك تفاعل فعلي','حافظ على الـformat']],
+ap:[['المشاهد بيشوف جزءًا محدودًا من الفيديو','ضعف محتمل في الـHook أو Pacing','اختبر Hook أسرع ثم راقب Average Watch Time'],['متوسط','Hook/Pacing مقبولين','شدّ الإيقاع في الجزء الأوسط'],['المشاهدون بيكملوا لجزء كبير','Content structure قوي','حافظ على البنية ومدة الفيديو']],
+r3:[['كتير بيسيبوا في أول 3 ثواني','الـHook مش بيطابق توقع المشاهد أو بطيء','غيّر أول 3 ثواني وخلّي سبب المشاهدة واضح'],['3-sec Retention متوسطة','Hook مقبول','اختبر نسخة أقصر'],['الـHook بيمسك المشاهد','Hook ليس المشكلة الرئيسية','افحص Pacing وValue delivery']]};
+const PR={
+'HOOK':{n:'Hook',why:'المشاهدون مش بيستمروا بعد بداية الفيديو، فالمشكلة بتحصل قبل ما يوصلوا للقيمة الأساسية.',act:'اختبر Hook أقصر وأكتر مباشرة في أول 3 ثواني، وخلّي سبب المشاهدة (الـPayoff) واضح.',test:'Question Hook vs Direct Claim Hook',succ:'3-second retention + Average Watch Time',st:['Hook مباشر','Problem','Payoff مبكر','Explanation','CTA']},
+'RETENTION':{n:'Retention',why:'الـRetention بتنزل في منتصف الفيديو: الـHook اشتغل لكن القيمة بتتأخر أو الإيقاع بيهبط (تفسير محتمل).',act:'قلّل الوقت قبل المعلومة التالية وحط Pattern Interrupt عند نقطة الـDrop.',test:'قص الجزء الأبطأ + Pattern Interrupt قبل نقطة الـDrop',succ:'Retention عند 50% + Average Viewed %',st:['Hook','Problem','معلومة 1 + Pattern Interrupt','معلومة 2','Lesson + CTA']},
+'PACING':{n:'Pacing',why:'الـRetention بتنزل تدريجيًا بدون Drop حاد: المحتوى غالبًا مفيد لكن الإيقاع ممكن يتحسن.',act:'شدّ الإيقاع: احذف الفواصل والتكرار وزوّد كثافة المعلومات.',test:'نسخة بقطعات أسرع (كل 2-3 ثواني) وبدون تكرار',succ:'Average Viewed % + Retention عند 75%',st:['Hook','Problem','Explanation سريع','Proof','CTA']},
+'CONTENT VALUE':{n:'Content Value',why:'مفيش Signal واحد قوي يميّز الفيديو، والتفاعل عمومًا ضعيف قياسًا بالـReach.',act:'اختار مشكلة واحدة محددة وقدّم لها نتيجة ملموسة (رقم/خطوات/Proof).',test:'Proof أو رقم محدد في أول 10 ثواني',succ:'Engagement Rate + Shares',st:['Hook','Problem','Proof','Value','CTA']},
+'SHAREABILITY':{n:'Shareability',why:'الفيديو بيتشاف كويس لكن مفيش سبب واضح يخلّي حد يبعته.',act:'ركّز على مشكلة محددة أو رأي قوي، واختم بـTakeaway عملي.',test:'Framing relatable ("ابعت ده لـ...")',succ:'Share Rate',st:['Hook','Problem محدد','Takeaway عملي','Send-this CTA']},
+'SAVEABILITY':{n:'Saveability',why:'المحتوى أقرب لـentertaining من Reference content، ومحتاج Utility قابل للرجوع إليه.',act:'حوّل المحتوى لـFramework/Checklist بخطوات وأرقام.',test:'نفس الموضوع في شكل Checklist',succ:'Save Rate',st:['Hook','Problem','3-5 خطوات','Template','Save CTA']},
+'CTA':{n:'CTA',why:'المحتوى بيشتغل لكن الـCTA مش بيحوّل المشاهدة لفعل.',act:'استبدل الـCTA العام بـCTA محدد مرتبط بالفيديو الجاي.',test:'CTA محدد vs CTA سؤال',succ:'Follow Conversion + Comment Rate',st:['Hook','Problem','Value','CTA محدد']},
+'FOLLOW CONVERSION':{n:'Follow Conversion',why:'القيمة وصلت لكن ربطها بهويتك ووعد الحساب ضعيف.',act:'اربط الفيديو بسلسلة محتوى واذكر وعد واضح للمتابع.',test:'Series framing ("الجزء 1 من ...")',succ:'Follow Conversion Rate',st:['Hook','Problem','Value','وعد الحساب','CTA']},
+'DISTRIBUTION':{n:'Distribution',why:'الأداء مع اللي شافوا الفيديو كويس لكن الوصول لغير المتابعين محدود.',act:'وسّع زاوية الموضوع لجمهور أعم وكرّر نفس الـformat.',test:'نفس الـformat على Topic أعم',succ:'Non-follower Reach Rate',st:['Hook','Problem عام','Value','CTA']},
+'DATA LIMITATION':{n:'Data Limitation',why:'البيانات المدخلة مش كفاية لتشخيص.',act:'أدخل Duration + Reach + Average Watch Time على الأقل.',test:'أعد التحليل بعد إدخال البيانات',succ:'—',st:['—']}};
+const PM={ret:0,wt:0,nf:'DISTRIBUTION',sh:'SHAREABILITY',sv:'SAVEABILITY',cm:'CTA',en:'CONTENT VALUE',lk:'CONTENT VALUE',cta:'CTA',pv:'CTA',cv:'CTA'};
+function parseDrops(s,dur){return(s||'').split(/\n/).map(x=>x.match(/(\d+\.?\d*)\D+(\d+\.?\d*)/)).filter(Boolean).map(x=>({t:+x[1],d:+x[2]}))}
+function analyze(d,b){
+ const m=calc(d),S={},ev=[],lim=[];const dur=d.dur||0,adj=dur&&dur<=15?10:dur<=30&&dur?5:dur>60?-8:0;
+ let apL=null,r3L=null;
+ if(m.ap!=null){apL=l5(m.ap,AP_CUTS.map(x=>x+adj));S.wt={s:SC[apL],v:m.ap,l:lv(SC[apL])}}
+ if(d.r3!=null){r3L=l5(d.r3,R3_CUTS);S.r3={s:SC[r3L],l:lv(SC[r3L])}}
+ const rc=[];if(r3L!=null)rc.push(SC[r3L]);if(apL!=null)rc.push(SC[apL]);
+ if(rc.length){const s=rc.reduce((a,c)=>a+c,0)/rc.length;S.ret={s,l:lv(s)}}
+ ['lk','cm','sh','sv','fl','en','nf'].forEach(k=>{if(m[k]!=null){const s=rs(k,m[k],b.n>=3?b:null);S[k]={s,v:m[k],l:lv(s)}}});
+ const cta=(d.cta||'').trim();if(cta){const g=cta.length<14||/(follow for more|تابعني|تابع للمزيد)/i.test(cta);S.cta={s:g?5.5:8,l:g?1:2}}else S.cta={s:4,l:0};
+ if(m.pv!=null)S.pv={s:m.pv<1?3:m.pv<3?6:9,l:0};
+ if(d.conv!=null)S.cv={s:d.pv?(d.conv/d.pv*100<2?3:d.conv/d.pv*100<8?6:9):(d.conv>0?6:3),l:1};
+ const w=W[d.obj]||W.Reach;let tot=0,sum=0,best=null,bg=-1;
+ for(const k in w){const x=S[k];if(!x||(k==='cta'&&!['Leads','Sales'].includes(d.obj)))continue;tot+=w[k];sum+=w[k]*x.s;const g=w[k]*(9.5-x.s);if(g>bg){bg=g;best=k}}
+ const score=tot?+(sum/tot).toFixed(1):null;
+ // retention diagnosis
+ const dr=parseDrops(d.drops);const bigEarly=(d.r3!=null&&d.r3<50)||dr.some(x=>x.t<=4&&x.d>=20)||(d.r3==null&&d.r25!=null&&d.r25<35);
+ const midBig=dr.some(x=>dur&&x.t/dur>.15&&x.t/dur<.85&&x.d>=15)||(d.r25!=null&&d.r50!=null&&d.r25-d.r50>=18)||(d.r50!=null&&d.r75!=null&&d.r50-d.r75>=18);
+ const hasCurve=d.r3!=null||dr.length||d.r25!=null||d.r50!=null;
+ let prob;
+ if(!best)prob='DATA LIMITATION';
+ else if(PM[best]===0){
+  if(bigEarly){prob='HOOK';if(d.r3!=null&&d.r3<50)ev.push(`3-sec retention ${d.r3}% (منخفضة)`);if(dr.some(x=>x.t<=4&&x.d>=20))ev.push('Drop كبير في أول ثواني');if(apL!=null&&apL<=1)ev.push(`Average Viewed % ${m.ap.toFixed(1)}% (${APN[apL]})`)}
+  else if(midBig){prob='RETENTION';ev.push('Drop كبير في منتصف الفيديو');if(r3L>=2)ev.push('3-sec retention جيدة (الـHook مش المشكلة)')}
+  else if(!hasCurve&&apL!=null&&apL<=1){prob='HOOK';ev.push(`Average Viewed % ${m.ap.toFixed(1)}% (${APN[apL]})`);ev.push('احتمال فقط: مفيش Retention Curve لتأكيد مكان النزول')}
+  else{prob='PACING';if(apL!=null)ev.push(`Average Viewed % ${m.ap.toFixed(1)}% (${APN[apL]})`);if(r3L>=2)ev.push('3-sec retention جيدة: Hook مش المشكلة')}}
+ else if(PM[best]==='CTA'&&best==='fl'||best==='fl')prob=S.cta.l<2?'CTA':'FOLLOW CONVERSION';
+ else prob=PM[best]||'CONTENT VALUE';
+ if(PM[best]!==0&&best){ev.push(`${NM[best]||best}: ${m[best]!=null?m[best].toFixed(2)+'%':'—'} (${['ضعيف','متوسط','قوي'][S[best].l]})`);if(S.wt&&S.wt.l==2)ev.push('Average Viewed % قوي: المحتوى بيمسك المشاهد')}
+ const n=Object.keys(S).length;let conf=ev.length>=2?'HIGH':ev.length==1?'MEDIUM':'LOW';
+ if(n<3)conf='LOW';if(['HOOK','RETENTION','PACING'].includes(prob)&&!hasCurve&&conf=='HIGH')conf='MEDIUM';
+ // conflicts
+ const cf=[];const L=k=>S[k]?S[k].l:null;
+ if(L('wt')===0&&L('sh')===2)cf.push('Average Watch Time ضعيف لكن Shares قوية: المحتوى يبدو قيّم لشريحة من المشاهدين، لكن الافتتاحية ممكن ما تمسكش كفاية للوصول للقيمة. اختبر افتتاحية أقوى مع الحفاظ على نفس الموضوع.');
+ if(L('wt')===2&&L('nf')===0)cf.push('Watch Time قوي مع وصول خارجي محدود: المحتوى ممكن يكون جيد رغم محدودية الـDistribution. Reach مش مقياس جودة.');
+ if(L('wt')===0&&L('nf')===2)cf.push('وصول خارجي كبير مع Watch Time ضعيف: الفيديو اتعرض لناس كتير لكن ما حافظش على المشاهدين.');
+ if(L('sh')===2&&L('cm')===0)cf.push('Shares عالية مع Comments قليلة: الفيديو Shareable أكتر من كونه Discussion-driven، ومش لازم تغيّر المحتوى.');
+ if(L('lk')===2&&(L('sh')===0||L('sv')===0))cf.push('Likes عالية مع Shares/Saves ضعيفة: الإعجاب أقوى من الـUtility/Shareability.');
+ if(L('wt')>=1&&L('wt')!=null&&L('sh')===2&&L('fl')===0)cf.push('Watch Time وShares قوية لكن Follows ضعيفة: نقطة التحسين غالبًا في الـCTA/ربط الفيديو بهوية الحساب.');
+ // limits
+ if(!hasCurve)lim.push('Retention Curve غير متاحة، تشخيص Hook/Retention محدود.');
+ if(d.follows==null)lim.push('Follows from Reel: Not available.');
+ if(d.shares==null)lim.push('Shares: Not available.');if(d.saves==null)lim.push('Saves: Not available.');
+ if(d.nonfR==null&&d.folR==null)lim.push('Followers/Non-followers Reach: Not available.');
+ if(['Leads','Sales'].includes(d.obj)&&d.conv==null)lim.push('Sales/Lead score محدود لأن بيانات التحويل غير متاحة.');
+ if(b.n<3)lim.push('البيانات التاريخية غير كافية: مفيش Baseline، التقييم بالـAnalytical benchmarks فقط.');
+ else if(b.n<6)lim.push('الـBaseline مبدئي (3-5 Reels).');
+ if(!d.reach)lim.push('Reach = 0 أو غير متاح: معدلات التفاعل مش محسوبة.');
+ // worked / didn't / keep
+ const nm={wt:'Retention/Average Viewed %',sh:'Shareability',sv:'Saveability (Utility)',fl:'Follow Conversion',nf:'Non-follower Reach',cm:'Comments/Discussion',en:'Engagement',lk:'Likes',r3:'Hook (3-sec retention)'};
+ const ok=Object.keys(nm).filter(k=>S[k]&&S[k].l==2).map(k=>nm[k]),bad=Object.keys(nm).filter(k=>S[k]&&S[k].l==0).map(k=>nm[k]);
+ return{m,S,score,prob,conf,ev,cf,lim,ok,bad,best,apL,adj}}
+function lvName(s){return s==null?'—':s>=8.5?'Excellent':s>=7?'Strong':s>=5.5?'Average':s>=4?'Weak':'Needs major improvement'}
+function topic(d){return(d.desc||d.title||'الموضوع ده').trim().slice(0,40)}
+function brief(d,a){const t=topic(d),P=PR[a.prob],good=a.score>=7&&a.prob!=='HOOK';
+ let cta=d.cta||'اختار CTA واحد محدد';
+ if(a.prob==='CTA'||a.prob==='FOLLOW CONVERSION')cta=`لو عايز تشوف الجزء الجاي من ${t}، اعمل Follow.`;else if(a.prob==='SHAREABILITY')cta='ابعت الفيديو ده لحد بيمر بنفس المشكلة.';else if(a.prob==='SAVEABILITY')cta='احفظ الفيديو وارجعله وقت التنفيذ.';else if(d.obj==='Engagement'||a.best==='cm')cta=`إيه تجربتك مع ${t}؟ اكتبها في الكومنت.`;
+ return{topic:good?'نفس الموضوع أو موضوع قريب (الأداء جيد)':'نفس الموضوع مع تغيير '+P.n+' فقط',hooks:[`"${t}؟ الإجابة غالبًا غير اللي متوقعها."`,`"${t}: ده الغلط اللي بيتكرر وانت مش واخد بالك."`],st:P.st,cta,test:P.test,succ:P.succ}}
+function row(k,name,val,x,a,b){const t=T[k==='wt'?'ap':k][x.l],pr=k===a.best||(k==='wt'&&a.best==='ret')?'HIGH':x.l==0?'MEDIUM':'LOW';
+ const bs=b.n>=3&&b[k]!=null&&k!=='r3'&&k!=='wt'?`<div class="s">Baseline (median): ${b[k].toFixed(2)}%</div>`:'';
+ return`<div class="m"><b>${name}</b> <span class="tag">${val}</span>${bs}<div>Interpretation: ${t[0]}</div><div>Diagnosis: ${t[1]}</div><div>Recommendation: ${t[2]}</div><div class="s">Priority: ${pr} · Confidence: ${pr==='HIGH'?a.conf:x.l==0?'MEDIUM':'LOW'}</div></div>`}
+function render(d,a,b){const P=PR[a.prob],br=brief(d,a),m=a.m,f=(v,u='%')=>v==null?'Not available':v.toFixed(2)+u;
+ const cards=[['Average Watch Time',d.awt!=null?d.awt+'s':'Not available'],['Average Viewed %',m.ap!=null?m.ap.toFixed(1)+'%':'Not available'],['Share Rate',f(m.sh)],['Save Rate',f(m.sv)],['Follow Conversion',f(m.fl)],['Engagement Rate',f(m.en)]];
+ const keep=a.ok.length?a.ok.join('، '):'الموضوع/الفكرة الأساسية (مفيش Metric قوية بما يكفي لتحديد حاجة أقوى)';
+ const bn=b.n>=3?`<div class="s">اتقارن مع الـBaseline بتاعك (${b.n} Reels${b.n<6?'، مبدئي':''}).</div>`:'';
+ let rows='';const mk=(k,n,v)=>{if(a.S[k])rows+=row(k,n,v,a.S[k],a,b)};
+ mk('wt','Average Watch Time / Viewed %',(d.awt!=null?d.awt+'s · ':'')+(m.ap!=null?m.ap.toFixed(1)+'%':''));mk('r3','3-sec Retention',d.r3+'%');
+ [['sh','Share Rate'],['sv','Save Rate'],['fl','Follow Conversion'],['cm','Comment Rate'],['lk','Like Rate'],['en','Engagement Rate'],['nf','Non-follower Reach']].forEach(([k,n])=>mk(k,n,f(m[k])));
+ return`<div class="card"><div class="s">REEL SCORE</div><div class="big">${a.score==null?'—':a.score}<span class="s"> / 10</span></div>
+<div>Performance Level: <span class="tag">${lvName(a.score)}</span></div><div class="s">الـScore أداة مقارنة داخلية وليس حكمًا رسميًا من Instagram. Objective: ${d.obj}</div>${bn}</div>
+<div class="card"><h2>Primary Problem: ${a.prob}</h2><div><b>Why:</b> ${P.why}</div><div><b>One thing to fix:</b> ${P.act}</div><div class="s">Confidence: ${a.conf}</div>
+<div class="s">Evidence:<ul>${a.ev.map(e=>`<li>${e}</li>`).join('')||'<li>—</li>'}</ul></div>${a.cf.map(c=>`<div class="m">⚠ ${c}</div>`).join('')}</div>
+<div class="g">${cards.map(c=>`<div class="card"><div class="s">${c[0]}</div><b style="font-size:1.3rem">${c[1]}</b></div>`).join('')}</div>
+<div class="card"><h2>Metric Breakdown</h2>${rows||'<div class="s">مفيش Metrics كفاية.</div>'}</div>
+<div class="kkc"><div><h3>What worked</h3>${a.ok.length?'<ul>'+a.ok.map(x=>`<li>${x}</li>`).join('')+'</ul>':'—'}</div><div><h3>What didn't</h3>${a.bad.length?'<ul>'+a.bad.map(x=>`<li>${x}</li>`).join('')+'</ul>':'—'}</div></div>
+<div class="kkc" style="margin-top:10px"><div class="k"><h3>KEEP</h3>${keep}<div class="s">Why: الإشارات دي قوية، فتغييرها يعرّضك لفقدان اللي شغال.</div></div>
+<div class="ch"><h3>CHANGE</h3>${P.act}<div class="s">Why: ${P.why}</div></div>
+<div class="te"><h3>TEST</h3>${P.test}<div class="s">Why: تجربة واحدة بمتغير واحد بتوضح لو التشخيص صح.</div></div></div>
+<div class="card"><h2>خطة الفيديو القادم</h2><div><b>Topic:</b> ${br.topic}</div><div><b>Hook (اختار واحد):</b><ul>${br.hooks.map(h=>`<li>${h}</li>`).join('')}</ul></div>
+<div><b>Structure:</b> ${br.st.join(' → ')}</div><div><b>CTA:</b> ${br.cta}</div><div><b>Main Test:</b> ${br.test}</div><div><b>Success Metric:</b> ${br.succ}</div><div class="s">Confidence: ${a.conf}</div></div>
+<div class="card"><h3>Data Limitations</h3><ul>${a.lim.map(x=>`<li>${x}</li>`).join('')||'<li>لا يوجد.</li>'}</ul>
+<div class="s">DATA → SIGNAL → DIAGNOSIS → HYPOTHESIS → NEXT TEST. الـBenchmarks تحليلية وليست Thresholds رسمية.</div></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="p" onclick="saveReel()">${editId?'تحديث في السجل':'احفظ في السجل'}</button><button onclick="go(-3)">تحليل جديد</button><button onclick="go(-1)">تعديل البيانات</button></div>`}
+function run(){const d=get();if(!d.reach&&d.awt==null&&d.r3==null&&d.shares==null){} const b=baseline(editId),a=analyze(d,b);cur={d,a};$('res').innerHTML=render(d,a,b)}
+function saveReel(){const h=load(),{d,a}=cur,id=editId||Date.now()+'';
+ const r={id,date:new Date().toISOString().slice(0,10),title:d.title||'بدون عنوان',d,m:a.m,score:a.score,prob:a.prob};
+ const i=h.findIndex(x=>x.id===id);if(i>=0)h[i]=r;else h.push(r);save(h);editId=null;alert('اتحفظ');tab(1)}
+function hist(){const h=load(),b=baseline(),el=$('t1');const pf=v=>v==null?'—':v.toFixed(2);
+ let o=`<div class="card"><h2>Baseline</h2>${b.n<3?`<div>البيانات التاريخية غير كافية (${b.n} Reels). محتاج 3 على الأقل.</div>`:`<div class="s">Median لـ${b.n} Reels (${b.n<6?'early benchmark':'أكثر موثوقية'})</div><div class="g">${[['ap','Avg Watch %'],['sh','Share'],['sv','Save'],['fl','Follow'],['en','Engagement']].map(([k,n])=>`<div>${n}<br><b>${pf(b[k])}%</b></div>`).join('')}</div>`}</div>`;
+ if(h.length){o+=`<div class="card sc"><h2>الريلز (${h.length})</h2><table><tr><th>التاريخ</th><th>العنوان</th><th>نوع</th><th>Score</th><th>Watch%</th><th>Share%</th><th>Save%</th><th>Follow%</th><th></th></tr>${h.map(r=>`<tr><td>${r.date}</td><td>${esc(r.title)}</td><td>${r.d.ctype}</td><td>${r.score??'—'}</td><td>${pf(r.m.ap)}</td><td>${pf(r.m.sh)}</td><td>${pf(r.m.sv)}</td><td>${pf(r.m.fl)}</td><td><button onclick="edit('${r.id}')">تعديل</button> <button onclick="del('${r.id}')">حذف</button></td></tr>`).join('')}</table></div>`;
+  o+=patterns(h)}
+ o+=`<div class="card" style="display:flex;gap:8px;flex-wrap:wrap"><button onclick="exp()">Export JSON</button><label style="margin:0"><span class="s">Import JSON</span><input type="file" accept=".json" onchange="imp(event)"></label><button onclick="if(confirm('مسح كل السجل؟')){save([]);hist()}">Clear history</button></div>`;el.innerHTML=o}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function patterns(h){if(h.length<3)return'';let o='<div class="card"><h2>Pattern Detection</h2>';
+ const grp=(f,k)=>{const g={};h.forEach(r=>{const v=r.d[f];if(r.m[k]!=null)(g[v]=g[v]||[]).push(r.m[k])});return Object.entries(g).filter(([,a])=>a.length>=2).map(([n,a])=>[n,med(a)]).sort((x,y)=>y[1]-x[1])};
+ [['ctype','ap','Average Watch %'],['hooktype','sh','Share Rate'],['ctype','sh','Share Rate']].forEach(([f,k,n])=>{const g=grp(f,k);if(g.length>=2)o+=`<div class="m">Pattern detected: ${n} أعلى في <b>${g[0][0]}</b> (${g[0][1].toFixed(1)}%) مقارنة بـ${g[g.length-1][0]} (${g[g.length-1][1].toFixed(1)}%). اختبر تكرار الفورمات الأقوى بدل تغيير الكل.</div>`});
+ if(h.length>=5){const s=[...h].filter(r=>r.score!=null).sort((a,b)=>b.score-a.score),k=Math.max(1,Math.round(s.length*.2)),top=s.slice(0,k),bot=s.slice(-k);
+  const sm=l=>`${l.map(r=>`${esc(r.title)} (${r.d.ctype} / ${r.d.hooktype} / ${r.d.dur||'?'}s / CTA: ${r.d.ctatype})`).join('<br>')}`;
+  o+=`<div class="m"><b>Top 20%</b><br>${sm(top)}</div><div class="m"><b>Bottom 20%</b><br>${sm(bot)}</div><div class="s">What did the winners have in common? قارن الأنواع والـHook والمدة والـCTA فوق.</div>`}
+ else o+='<div class="s">Top/Bottom 20% بيظهروا من 5 Reels.</div>';return o+'</div>'}
+function edit(id){const r=load().find(x=>x.id===id);if(!r)return;editId=id;for(const k in r.d){const e=$(k);if(e&&e.hasAttribute('data-f'))e.value=r.d[k]==null?'':r.d[k]}
+ document.querySelectorAll('.stc').forEach(e=>e.checked=(r.d.st||[]).includes(e.value));tab(0);step=0;go(0)}
+function del(id){if(confirm('حذف الريل؟')){save(load().filter(r=>r.id!==id));hist()}}
+function exp(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(load(),null,1)],{type:'application/json'}));a.download='reels-history.json';a.click()}
+function imp(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);if(!Array.isArray(j))throw 0;const h=load(),ids=new Set(h.map(x=>x.id));j.forEach(x=>{if(x&&x.id&&x.d&&x.m&&!ids.has(x.id))h.push(x)});save(h);hist()}catch(_){alert('ملف JSON غير صالح')}};r.readAsText(f)}
+go(0);
+</script></body></html>
